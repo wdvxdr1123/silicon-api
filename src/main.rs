@@ -125,14 +125,16 @@ async fn code_to_image(input: web::Json<SiliconReq>) -> Result<HttpResponse, Err
 
     let mut formatter = get_formatter(&input.format).unwrap();
     let image = formatter.format(highlight.as_ref(), theme);
-    let file = format!("images/{}.png", Uuid::new_v4());
-    image.save(file.as_str()).map_err(|_| {
+    let file = format!("{}.png", Uuid::new_v4());
+    image.save(format!("images/{}", file)).map_err(|_| {
         HttpResponse::BadRequest().json(&SiliconResp {
             code: 103,
             err: Some("save file error".to_string()),
             url: None,
         })
     })?;
+
+    println!("generate image {}.png successfully!", file);
     Ok(HttpResponse::Ok().json(&SiliconResp {
         code: 200,
         err: None,
