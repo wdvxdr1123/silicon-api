@@ -1,5 +1,5 @@
 [package]
-name = "tachy-api"
+name = "silicon-api"
 version = "0.1.0"
 authors = ["wdvxdr <wdvxdr@foxmail.com>"]
 edition = "2018"

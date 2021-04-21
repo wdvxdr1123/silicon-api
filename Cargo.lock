@@ -2302,6 +2302,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "silicon-api"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "lazy_static",
+ "serde",
+ "serde_json",
+ "silicon",
+ "syntect",
+ "uuid",
+]
+
+[[package]]
 name = "slab"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2449,19 +2462,6 @@ dependencies = [
  "serde_json",
  "walkdir",
  "yaml-rust",
-]
-
-[[package]]
-name = "tachy-api"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "lazy_static",
- "serde",
- "serde_json",
- "silicon",
- "syntect",
- "uuid",
 ]
 
 [[package]]

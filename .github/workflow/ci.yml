@@ -1,0 +1,55 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  ci:
+    name: ${{ matrix.os }} for ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-musl
+          - x86_64-pc-windows-msvc
+          - x86_64-apple-darwin
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            artifact_name: target/x86_64-unknown-linux-musl/release/silicon-api
+            release_name: linux-x86_64
+            cross: true
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: target/x86_64-pc-windows-msvc/release/silicon-api.exe
+            release_name: windows-x86_64.exe
+            cross: false
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: target/x86_64-apple-darwin/release/silicon-api
+            release_name: macos-x86_64
+            cross: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: cargo build
+          uses: actions-rs/cargo@v1
+          with:
+            command: build
+            args: --release --locked --target=${{ matrix.target }}
+            use-cross: ${{ matrix.cross }}
+
+      - name: Upload artifact
+          uses: actions/upload-artifact@v2
+          if: ${{ !github.head_ref }}
+          with:
+            name: ${{ matrix.release_name }}
+            path: ${{ artifact_name }}
