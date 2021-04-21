@@ -41,15 +41,15 @@ jobs:
           override: true
 
       - name: cargo build
-          uses: actions-rs/cargo@v1
-          with:
-            command: build
-            args: --release --locked --target=${{ matrix.target }}
-            use-cross: ${{ matrix.cross }}
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --locked --target=${{ matrix.target }}
+          use-cross: ${{ matrix.cross }}
 
       - name: Upload artifact
-          uses: actions/upload-artifact@v2
-          if: ${{ !github.head_ref }}
-          with:
-            name: ${{ matrix.release_name }}
-            path: ${{ artifact_name }}
+        uses: actions/upload-artifact@v2
+        if: ${{ !github.head_ref }}
+        with:
+          name: ${{ matrix.release_name }}
+          path: ${{ matrix.artifact_name }}
