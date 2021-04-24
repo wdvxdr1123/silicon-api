@@ -1,3 +1,5 @@
+mod ecy;
+
 use std::{borrow::Borrow, fs, io};
 
 use actix_web::{post, web, App, Error, HttpResponse, HttpServer, Result};
@@ -7,6 +9,7 @@ use silicon::formatter::{ImageFormatter, ImageFormatterBuilder};
 use silicon::utils;
 use uuid::Uuid;
 
+use actix_web::web::{get, resource};
 use syntect::{
     easy::HighlightLines, highlighting::ThemeSet, parsing::SyntaxSet, util::LinesWithEndings,
 };
@@ -123,7 +126,7 @@ async fn code_to_image(input: web::Json<SiliconReq>) -> Result<HttpResponse, Err
         .map(|line| h.highlight(line, ps))
         .collect::<Vec<_>>();
 
-    let mut formatter = get_formatter(&input.format).unwrap();
+    let mut formatter = get_formatter(&input.format)?;
     let image = formatter.format(highlight.as_ref(), theme);
     let file = format!("{}.png", Uuid::new_v4());
     image.save(format!("images/{}", file)).map_err(|_| {
@@ -146,9 +149,13 @@ async fn code_to_image(input: web::Json<SiliconReq>) -> Result<HttpResponse, Err
 async fn main() -> io::Result<()> {
     fs::create_dir("images").unwrap_or_default();
 
-    let _ = HttpServer::new(|| App::new().service(code_to_image))
-        .bind(format!("{}:{}", CONFIG.host, CONFIG.port))?
-        .run()
-        .await;
+    let _ = HttpServer::new(|| {
+        App::new()
+            .service(code_to_image)
+            .service(resource("/nene").route(get().to(ecy::nene)))
+    })
+    .bind(format!("{}:{}", CONFIG.host, CONFIG.port))?
+    .run()
+    .await;
     Ok(())
 }
