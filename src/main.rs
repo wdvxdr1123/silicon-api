@@ -1,17 +1,21 @@
 mod ecy;
+mod hitokoto;
 
 use std::{borrow::Borrow, fs, io};
 
-use actix_web::{post, web, App, Error, HttpResponse, HttpServer, Result};
+use actix_web::{
+    middleware::Logger,
+    web::{get, post, Json},
+    App, Error, HttpResponse, HttpServer, Result,
+};
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use silicon::formatter::{ImageFormatter, ImageFormatterBuilder};
 use silicon::utils;
 use uuid::Uuid;
 
-use actix_web::web::{get, resource};
 use syntect::{
-    easy::HighlightLines, highlighting::ThemeSet, parsing::SyntaxSet, util::LinesWithEndings,
+    easy::HighlightLines,  highlighting::ThemeSet, parsing::SyntaxSet, util::LinesWithEndings,
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -96,8 +100,7 @@ pub struct SiliconResp {
     url: Option<String>,
 }
 
-#[post("/silicon")]
-async fn code_to_image(input: web::Json<SiliconReq>) -> Result<HttpResponse, Error> {
+pub async fn code_to_image(input: Json<SiliconReq>) -> Result<HttpResponse> {
     let ps = SYNTECT.0.borrow();
     let language = ps
         .find_syntax_by_token(input.format.language.as_str())
@@ -151,8 +154,10 @@ async fn main() -> io::Result<()> {
 
     let _ = HttpServer::new(|| {
         App::new()
-            .service(code_to_image)
-            .service(resource("/nene").route(get().to(ecy::nene)))
+            .wrap(Logger::default())
+            .route("/silicon", post().to(code_to_image))
+            .route("/nene", get().to(ecy::nene))
+            .route("/hitokoto", get().to(hitokoto::hitokoto))
     })
     .bind(format!("{}:{}", CONFIG.host, CONFIG.port))?
     .run()
