@@ -55,7 +55,7 @@ pub async fn hitokoto(params: web::Query<HitokotoParam>) -> Result<HttpResponse>
 
     let r = cmd("RPOPLPUSH")
         .arg(category.clone())
-        .arg(category.clone())
+        .arg(category)
         .query_async::<_, String>(&mut con)
         .await
         .map_err(|x| HttpResponse::BadRequest().body(x.to_string()))?;
